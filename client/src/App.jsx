@@ -14,6 +14,7 @@ import LiveBookingTicker from './components/LiveBookingTicker';
 import ScrollFlightIndicator from './components/ScrollFlightIndicator';
 import ScrollParallaxSky from './components/ScrollParallaxSky';
 import AirlinerSVG from './components/AirlinerSVG';
+import IntroScreen from './components/IntroScreen';
 import { fetchAirports, searchFlights, createBooking } from './services/api';
 import { 
   Plane, 
@@ -28,6 +29,7 @@ import {
 
 export default function App() {
   const [view, setView] = useState('HOME'); // 'HOME' | 'FLIGHTS_OUTBOUND' | 'FLIGHTS_RETURN' | 'PASSENGERS' | 'PAYMENT' | 'ETICKET'
+  const [showIntro, setShowIntro] = useState(true);
   const [airports, setAirports] = useState([]);
   
   // Search state
@@ -169,6 +171,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
       
+      {/* Cinematic Airport Takeoff Splash Intro */}
+      {showIntro && (
+        <IntroScreen onFinish={() => setShowIntro(false)} />
+      )}
+
       {/* Scroll-Driven Flight Path & Altitude Indicator */}
       <ScrollFlightIndicator />
 
