@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plane, ChevronUp, Gauge, Compass } from 'lucide-react';
+import AirlinerSVG from './AirlinerSVG';
+import { Gauge, Compass, ChevronUp, Wind } from 'lucide-react';
 
 export default function ScrollFlightIndicator() {
   const [smoothProgress, setSmoothProgress] = useState(0);
@@ -7,6 +8,7 @@ export default function ScrollFlightIndicator() {
   const [smoothSpeed, setSmoothSpeed] = useState(0);
   const [pitchAngle, setPitchAngle] = useState(0);
   const [isActivelyCruising, setIsActivelyCruising] = useState(false);
+  const [isSuperBoost, setIsSuperBoost] = useState(false);
   const [showHUD, setShowHUD] = useState(false);
 
   const targetProgress = useRef(0);
@@ -27,14 +29,13 @@ export default function ScrollFlightIndicator() {
       if (idleTimeout.current) clearTimeout(idleTimeout.current);
       idleTimeout.current = setTimeout(() => {
         setIsActivelyCruising(false);
-      }, 400);
+      }, 350);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // 2. Physics animation loop with Lerp & Momentum
+    // 2. Physics animation loop with Smooth Damping (Lerp = 0.08)
     const updatePhysics = () => {
-      // Aerodynamic interpolation (Lerp with dampening factor 0.08)
       const prevProgress = currentProgress.current;
       const diff = targetProgress.current - currentProgress.current;
       
@@ -44,25 +45,25 @@ export default function ScrollFlightIndicator() {
       const progress = currentProgress.current;
       setSmoothProgress(progress);
 
-      // Smooth aerodynamic bank/pitch tilt:
-      // When scrolling down, plane banks down (positive pitch); when scrolling up, banks up.
-      // Velocity is typically around 0.001 - 0.015. Multiply by 600 for natural degrees.
-      const rawTilt = currentVelocity.current * 750;
-      const clampedTilt = Math.max(-18, Math.min(18, rawTilt));
+      // Natural aerodynamic bank/tilt:
+      // When scrolling down (positive velocity), plane pitches down slightly (-10deg to 15deg)
+      const rawTilt = currentVelocity.current * 650;
+      const clampedTilt = Math.max(-16, Math.min(16, rawTilt));
       setPitchAngle(clampedTilt);
 
-      // Smooth altitude calculation: 0 -> 36,000 FT -> 0 (descent at end of page)
+      // Smooth altitude calculation:
+      // From 0 to 36,000 FT at cruising altitude
       const targetAlt = Math.round(
-        progress < 0.15
-          ? (progress / 0.15) * 28000
-          : progress < 0.85
-          ? 28000 + Math.sin((progress - 0.15) / 0.7 * Math.PI) * 8000
-          : (1 - (progress - 0.85) / 0.15) * 36000
+        progress < 0.12
+          ? (progress / 0.12) * 26000
+          : progress < 0.88
+          ? 26000 + Math.sin((progress - 0.12) / 0.76 * Math.PI) * 10000
+          : (1 - (progress - 0.88) / 0.12) * 36000
       );
-      setSmoothAltitude(prev => Math.round(prev + (targetAlt - prev) * 0.1));
+      setSmoothAltitude(prev => Math.round(prev + (targetAlt - prev) * 0.08));
 
-      // Smooth speed calculation (cruising 860 km/h)
-      const targetSpd = Math.abs(currentVelocity.current) > 0.0003 ? 880 : 720;
+      // Speed calculation (840 - 920 KM/H when cruising)
+      const targetSpd = Math.abs(currentVelocity.current) > 0.0002 ? 890 : 740;
       setSmoothSpeed(prev => Math.round(prev + (targetSpd - prev) * 0.05));
 
       animFrameId.current = requestAnimationFrame(updatePhysics);
@@ -77,97 +78,107 @@ export default function ScrollFlightIndicator() {
     };
   }, []);
 
-  const scrollToTop = () => {
+  const handleReturnToTop = () => {
+    setIsSuperBoost(true);
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
+    setTimeout(() => {
+      setIsSuperBoost(false);
+    }, 1200);
   };
 
   return (
     <>
-      {/* 1. TOP HORIZONTAL FLIGHT PATH WITH SILKY GLIDING JET */}
-      <div 
-        className="fixed top-0 left-0 right-0 h-1 z-50 bg-slate-200/40 backdrop-blur-xs pointer-events-none"
-        onMouseEnter={() => setShowHUD(true)}
-        onMouseLeave={() => setShowHUD(false)}
-      >
-        {/* Soft Glowing Gradient Trail */}
+      {/* 1. TOP MINIMALIST AIRLINE FLIGHT LINE */}
+      <div className="fixed top-0 left-0 right-0 h-1 z-50 bg-slate-200/30 backdrop-blur-xs pointer-events-none">
         <div 
-          className="h-full bg-gradient-to-r from-blue-600 via-sky-400 to-cyan-300 relative will-change-transform shadow-[0_0_8px_rgba(56,189,248,0.5)]"
+          className="h-full bg-gradient-to-r from-blue-700 via-sky-400 to-cyan-300 relative will-change-transform shadow-[0_0_10px_rgba(56,189,248,0.6)] transition-all duration-75"
           style={{ width: `${smoothProgress * 100}%` }}
         >
-          {/* Plane Container with Organic Rotation & Smooth Translation */}
-          <div 
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 pointer-events-auto cursor-pointer group"
-            style={{
-              transform: `translate(50%, -50%) rotate(${pitchAngle * 0.6}deg)`
-            }}
-            title="Đang bay theo tiến trình trang - Bấm để về đầu trang"
-            onClick={scrollToTop}
-          >
-            {/* Jet Engine Soft Afterburner Flame */}
-            {isActivelyCruising && (
-              <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none transition-opacity duration-300">
-                <span className="w-4 h-1.5 bg-gradient-to-l from-amber-400 via-sky-300 to-transparent rounded-full animate-jet-flame opacity-90 shadow-[0_0_6px_#38bdf8]" />
-              </div>
-            )}
-
-            {/* Jet Airplane Icon */}
-            <div className="w-6 h-6 rounded-full bg-white shadow-md border border-sky-300/80 flex items-center justify-center text-blue-600 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 ease-out">
-              <Plane className="w-3.5 h-3.5 rotate-90" />
-            </div>
-          </div>
+          {/* Glowing pulse at the leading tip */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#38bdf8]" />
         </div>
       </div>
 
-      {/* 2. MINIMALIST & REFINED VERTICAL FLIGHT HUD (Right side) */}
-      <div className="hidden lg:flex fixed right-5 bottom-8 z-40 flex-col items-end gap-2 select-none">
-        
-        {/* Flight HUD telemetry badge */}
+      {/* 2. DELUXE 3D FLYING JET COMPANION (Fixed Right Screen Edge) */}
+      <div 
+        className="fixed right-6 bottom-8 z-40 flex flex-col items-end gap-3 select-none"
+        onMouseEnter={() => setShowHUD(true)}
+        onMouseLeave={() => setShowHUD(false)}
+      >
+        {/* Cockpit Flight Deck Telemetry Ribbon */}
         <div 
-          className={`bg-white/90 backdrop-blur-md px-3.5 py-2.5 rounded-2xl shadow-xl border border-slate-200/80 text-xs font-mono transition-all duration-500 ease-out flex items-center gap-3 ${
-            isActivelyCruising || showHUD || smoothProgress > 0.1
+          className={`bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-blue-500/30 text-xs font-mono transition-all duration-400 ease-out flex items-center gap-4 ${
+            isActivelyCruising || showHUD || smoothProgress > 0.08
               ? 'opacity-100 translate-y-0 scale-100'
               : 'opacity-0 translate-y-3 scale-95 pointer-events-none'
           }`}
-          onMouseEnter={() => setShowHUD(true)}
-          onMouseLeave={() => setShowHUD(false)}
         >
+          {/* Compass & Callsign */}
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-              <Compass className="w-4 h-4 animate-spin" style={{ animationDuration: '14s' }} />
+            <div className="w-8 h-8 rounded-xl bg-blue-600/30 text-sky-400 flex items-center justify-center shrink-0 border border-blue-400/20">
+              <Compass className="w-4 h-4 animate-spin" style={{ animationDuration: '18s' }} />
             </div>
             <div>
-              <div className="text-[10px] uppercase font-bold text-slate-400 leading-tight">Độ cao bay</div>
-              <div className="text-xs font-black text-slate-800">
-                {smoothAltitude > 0 ? `${smoothAltitude.toLocaleString()} FT` : 'Mặt đất'}
+              <div className="text-[10px] uppercase font-bold text-slate-400 leading-tight">Chuyến bay BV-2026</div>
+              <div className="text-xs font-black text-cyan-300">
+                {smoothAltitude > 1000 ? `${smoothAltitude.toLocaleString()} FT` : 'Đang cất cánh'}
               </div>
             </div>
           </div>
 
-          <div className="w-px h-6 bg-slate-200" />
+          <div className="w-px h-7 bg-slate-700/80" />
+
+          {/* Speed & Progress */}
+          <div>
+            <div className="text-[10px] uppercase font-bold text-slate-400 leading-tight">Vận tốc</div>
+            <div className="text-xs font-bold text-amber-400">{smoothSpeed} KM/H</div>
+          </div>
+
+          <div className="w-px h-7 bg-slate-700/80" />
 
           <div>
             <div className="text-[10px] uppercase font-bold text-slate-400 leading-tight">Lộ trình</div>
-            <div className="text-xs font-black text-blue-600">
-              {Math.round(smoothProgress * 100)}%
-            </div>
+            <div className="text-xs font-black text-emerald-400">{Math.round(smoothProgress * 100)}%</div>
           </div>
         </div>
 
-        {/* Floating Return-To-Top Jet Button */}
-        {smoothProgress > 0.08 && (
-          <button
-            onClick={scrollToTop}
-            title="Bay vút về đầu trang"
-            className="group relative flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-lg shadow-blue-500/25 transition-all duration-300 hover:scale-105 active:scale-95 animate-in fade-in zoom-in-75"
+        {/* The Interactive Flying Airliner */}
+        <div 
+          onClick={handleReturnToTop}
+          title="Nhấn để vút bay về đầu trang!"
+          className="group relative cursor-pointer p-2 flex flex-col items-center"
+        >
+          {/* The Aircraft Body with Aerodynamic Pitch & Supersonic Boost */}
+          <div 
+            className="transition-transform duration-300 ease-out will-change-transform"
+            style={{
+              transform: isSuperBoost
+                ? 'translateY(-30px) rotate(-35deg) scale(1.25)'
+                : `rotate(${pitchAngle}deg) translateY(${isActivelyCruising ? -4 : 0}px)`
+            }}
           >
-            <Plane className="w-4 h-4 -rotate-45 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform duration-300" />
-            <span>Về đầu trang</span>
-            <ChevronUp className="w-3.5 h-3.5 opacity-70 group-hover:-translate-y-0.5 transition-transform duration-300" />
-          </button>
-        )}
+            <AirlinerSVG 
+              className="w-20 h-20 group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_12px_24px_rgba(37,99,235,0.3)]" 
+              airlineColor="#2563eb"
+              showContrails={isActivelyCruising || isSuperBoost}
+              isCruising={isActivelyCruising || isSuperBoost}
+            />
+          </div>
+
+          {/* Return-to-top Pill Label */}
+          {smoothProgress > 0.1 && (
+            <button
+              onClick={handleReturnToTop}
+              className="mt-1 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md hover:bg-blue-600 hover:text-white border border-slate-200 text-slate-700 font-bold text-[10px] shadow-md flex items-center gap-1 transition-all duration-200 group-hover:scale-105 active:scale-95"
+            >
+              <ChevronUp className="w-3 h-3 text-blue-600 group-hover:text-white transition-colors" />
+              <span>Về đầu trang</span>
+            </button>
+          )}
+        </div>
 
       </div>
     </>

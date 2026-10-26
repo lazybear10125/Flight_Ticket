@@ -13,6 +13,7 @@ import BookingProgress from './components/BookingProgress';
 import LiveBookingTicker from './components/LiveBookingTicker';
 import ScrollFlightIndicator from './components/ScrollFlightIndicator';
 import ScrollParallaxSky from './components/ScrollParallaxSky';
+import AirlinerSVG from './components/AirlinerSVG';
 import { fetchAirports, searchFlights, createBooking } from './services/api';
 import { 
   Plane, 
@@ -193,11 +194,16 @@ export default function App() {
               <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -z-0 pointer-events-none" />
               <div className="absolute -bottom-10 left-1/3 w-80 h-80 bg-indigo-500/10 rounded-full blur-2xl -z-0 pointer-events-none" />
 
-              {/* Animated Soaring Jet Airplane with Vapor Trail */}
-              <div className="absolute top-14 left-0 pointer-events-none animate-plane-fly z-0">
-                <div className="flex items-center">
-                  <div className="w-56 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-300/40 to-white/90 shadow-[0_0_8px_#38bdf8]" />
-                  <Plane className="w-8 h-8 text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] -rotate-45" />
+              {/* High-Fidelity Commercial Airliner Soaring Across Sky */}
+              <div className="absolute top-12 left-0 pointer-events-none animate-plane-fly z-0">
+                <div className="flex items-center -rotate-12">
+                  <div className="w-72 h-[2px] bg-gradient-to-r from-transparent via-cyan-300/30 to-white/80 rounded-full blur-[0.5px]" />
+                  <AirlinerSVG 
+                    className="w-20 h-20 -rotate-45 drop-shadow-[0_0_20px_rgba(56,189,248,0.6)]" 
+                    airlineColor="#38bdf8"
+                    showContrails={true}
+                    isCruising={true}
+                  />
                 </div>
               </div>
 

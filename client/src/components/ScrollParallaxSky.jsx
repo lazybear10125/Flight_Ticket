@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Plane } from 'lucide-react';
+import AirlinerSVG from './AirlinerSVG';
+import { Cloud } from 'lucide-react';
 
 export default function ScrollParallaxSky() {
   const containerRef = useRef(null);
-  const [planePositionX, setPlanePositionX] = useState(15); // in percentage (0 to 100)
+  const [planePositionX, setPlanePositionX] = useState(15);
   const [waveOffset, setWaveOffset] = useState(0);
 
   useEffect(() => {
@@ -15,20 +16,20 @@ export default function ScrollParallaxSky() {
       const rect = containerRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
 
-      // Section scroll visibility factor (0 when entering bottom, 1 when exiting top)
+      // Section scroll visibility factor (0 to 1)
       const totalDistance = windowHeight + rect.height;
       const currentPassed = windowHeight - rect.top;
       const factor = Math.min(1, Math.max(0, currentPassed / totalDistance));
 
-      // Smooth horizontal progress from -10% to 105%
-      const targetX = -10 + factor * 115;
+      // Glide smoothly from -15% on left across to 110% on right
+      const targetX = -15 + factor * 125;
       setPlanePositionX(targetX);
     };
 
     const animateWave = () => {
-      time += 0.03;
-      // Gentle atmospheric bobbing (sin wave)
-      setWaveOffset(Math.sin(time) * 4);
+      time += 0.025;
+      // Gentle atmospheric buoyancy bobbing (sine wave)
+      setWaveOffset(Math.sin(time) * 5);
       animId = requestAnimationFrame(animateWave);
     };
 
@@ -45,29 +46,37 @@ export default function ScrollParallaxSky() {
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-16 overflow-hidden pointer-events-none my-6 select-none opacity-50 hover:opacity-85 transition-opacity duration-300"
+      className="relative w-full h-24 overflow-hidden pointer-events-none my-8 select-none opacity-85 transition-opacity duration-300"
     >
-      {/* Soft dashed flight corridor baseline */}
-      <div className="absolute top-1/2 left-0 right-0 h-px border-b border-dashed border-blue-200/60" />
+      {/* Background Soft Sky Corridor with subtle clouds */}
+      <div className="absolute top-1/2 left-0 right-0 h-px border-b border-dashed border-blue-200/50" />
+      <div className="absolute top-4 left-1/4 opacity-25">
+        <Cloud className="w-16 h-16 text-blue-300 animate-cloud-slow" />
+      </div>
+      <div className="absolute bottom-2 right-1/3 opacity-20">
+        <Cloud className="w-20 h-20 text-indigo-300 animate-cloud-slow" style={{ animationDelay: '10s' }} />
+      </div>
 
-      {/* Commercial Jet Airliner gliding horizontally */}
+      {/* Commercial Passenger Jet Airliner cruising through */}
       <div 
-        className="absolute top-1/2 -translate-y-1/2 flex items-center will-change-transform transition-transform duration-200 ease-out"
+        className="absolute top-1/2 -translate-y-1/2 flex items-center will-change-transform transition-transform duration-150 ease-out"
         style={{
           left: `${planePositionX}%`,
-          transform: `translate(-50%, calc(-50% + ${waveOffset}px)) rotate(${waveOffset * 0.5}deg)`
+          transform: `translate(-50%, calc(-50% + ${waveOffset}px)) rotate(${90 + waveOffset * 0.4}deg)`
         }}
       >
-        {/* Soft Vapor contrail fading behind */}
-        <div className="w-56 h-[1.5px] bg-gradient-to-r from-transparent via-sky-300/30 to-blue-500/50 rounded-full blur-[0.5px]" />
+        <AirlinerSVG 
+          className="w-24 h-24 drop-shadow-[0_16px_32px_rgba(30,58,138,0.25)]"
+          airlineColor="#004c8c"
+          showContrails={true}
+          isCruising={true}
+        />
+      </div>
 
-        {/* Airplane Badge */}
-        <div className="flex items-center gap-1.5 text-blue-700 bg-white/85 px-2.5 py-1 rounded-full shadow-sm border border-blue-100 backdrop-blur-xs">
-          <Plane className="w-4 h-4 rotate-90 text-blue-600" />
-          <span className="text-[10px] font-mono font-bold text-slate-700 tracking-wider">
-            VN-A350 • 35,000 FT
-          </span>
-        </div>
+      {/* Flight info tag floating near right corner */}
+      <div className="absolute bottom-2 right-8 text-[11px] font-mono text-slate-400 flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span>RADAR 24/7 • ĐỘ CAO 35,000 FT</span>
       </div>
     </div>
   );
