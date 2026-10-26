@@ -1,0 +1,21 @@
+{
+  "name": "bayviet-flight-ticket",
+  "version": "1.0.0",
+  "description": "Website đặt vé máy bay trực tuyến hiện đại - BayViet Air",
+  "scripts": {
+    "server": "node server/index.js",
+    "client": "npm --prefix client run dev",
+    "start": "node -e \"const { spawn } = require('child_process'); spawn('npm', ['--prefix', 'client', 'run', 'dev'], { stdio: 'inherit', shell: true }); spawn('node', ['server/index.js'], { stdio: 'inherit', shell: true });\""
+  },
+  "keywords": [
+    "flight-ticket",
+    "airline-booking",
+    "vietnam-airlines",
+    "vietjet",
+    "bamboo-airways",
+    "react",
+    "express"
+  ],
+  "author": "BayViet Air Team",
+  "license": "MIT"
+}

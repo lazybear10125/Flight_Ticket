@@ -1,0 +1,78 @@
+[
+  {
+    "contact": {
+      "fullName": "Nguyen Van An",
+      "email": "test@gmail.com",
+      "phone": "0987654321"
+    },
+    "passengers": [
+      {
+        "fullName": "NGUYEN VAN AN",
+        "type": "adult",
+        "seat": "12A"
+      }
+    ],
+    "outboundFlight": {
+      "flightNumber": "VN 210",
+      "airline": {
+        "code": "VN",
+        "name": "Vietnam Airlines"
+      }
+    },
+    "bookingCode": "VN-Q3YF",
+    "createdAt": "2026-10-26T05:53:26.192Z",
+    "status": "CONFIRMED",
+    "paymentStatus": "PAID",
+    "eTicketNumber": "738-8214268202"
+  },
+  {
+    "bookingCode": "VN782910",
+    "createdAt": "2026-10-26T05:46:13.858Z",
+    "status": "CONFIRMED",
+    "paymentStatus": "PAID",
+    "paymentMethod": "VIETQR",
+    "contact": {
+      "fullName": "Nguyễn Văn An",
+      "email": "nguyenvanan@gmail.com",
+      "phone": "0987654321"
+    },
+    "tripType": "one-way",
+    "passengers": [
+      {
+        "id": "p1",
+        "title": "Mr",
+        "fullName": "NGUYEN VAN AN",
+        "type": "adult",
+        "selectedSeat": "12A",
+        "extraBaggageKg": 20,
+        "meal": "Cơm bò xào sả ớt"
+      }
+    ],
+    "outboundFlight": {
+      "flightNumber": "VN 210",
+      "airlineName": "Vietnam Airlines",
+      "aircraft": "Boeing 787-9",
+      "origin": {
+        "code": "HAN",
+        "city": "Hà Nội",
+        "time": "07:30",
+        "date": "2026-10-30"
+      },
+      "destination": {
+        "code": "SGN",
+        "city": "TP. Hồ Chí Minh",
+        "time": "09:40",
+        "date": "2026-10-30"
+      },
+      "cabinClass": "economy"
+    },
+    "pricing": {
+      "flightFare": 1450000,
+      "taxesAndFees": 261000,
+      "seatsTotal": 60000,
+      "baggageTotal": 250000,
+      "totalAmount": 2021000,
+      "currency": "VND"
+    }
+  }
+]
